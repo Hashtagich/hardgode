@@ -49,10 +49,9 @@ class StudentSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     """Список групп."""
 
-    # TODO Доп. задание
-
     class Meta:
         model = Group
+        fields = '__all__'
 
 
 class CreateGroupSerializer(serializers.ModelSerializer):
@@ -62,7 +61,6 @@ class CreateGroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = (
             'title',
-            'course',
         )
 
 
@@ -87,19 +85,30 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_lessons_count(self, obj):
         """Количество уроков в курсе."""
-        # TODO Доп. задание
+        return obj.lessons.count()
 
     def get_students_count(self, obj):
         """Общее количество студентов на курсе."""
-        # TODO Доп. задание
+        return Subscription.objects.filter(course=obj).values('user').distinct().count()
 
     def get_groups_filled_percent(self, obj):
-        """Процент заполнения групп, если в группе максимум 30 чел.."""
-        # TODO Доп. задание
+        """Процент заполнения групп, если в группе максимум 30 чел."""
+        total_groups = obj.groups.count()  # Предполагается, что у курса есть реляция с группами
+        if total_groups == 0:
+            return 0
+        total_students = Subscription.objects.filter(course=obj).count()
+        # Максимум 30 студентов в группе
+        max_students = total_groups * 30
+        return (total_students / max_students) * 100 if max_students > 0 else 0
 
     def get_demand_course_percent(self, obj):
         """Процент приобретения курса."""
-        # TODO Доп. задание
+        # Пример: если доступно 100 курсов, можно получить процент проданных
+        total_courses = Course.objects.count()
+        if total_courses == 0:
+            return 0
+        sold_courses = Subscription.objects.filter(course=obj).count()
+        return (sold_courses / total_courses) * 100
 
     class Meta:
         model = Course
@@ -122,3 +131,4 @@ class CreateCourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
+        fields = '__all__'

@@ -12,15 +12,12 @@ class CustomUserSerializer(UserSerializer):
 
     class Meta:
         model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'is_active', 'is_staff', 'email', 'balance', 'groups']
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор подписки."""
 
-    # TODO
-
     class Meta:
         model = Subscription
-        fields = (
-            # TODO
-        )
+        fields = ['id', 'user', 'course', 'group']
