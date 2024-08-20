@@ -18,7 +18,15 @@ class Course(models.Model):
         verbose_name='Дата и время начала курса'
     )
 
-    # TODO
+    price = models.DecimalField(
+        blank=True,
+        null=True,
+        decimal_places=2,
+        max_digits=6,
+        verbose_name='Цена',
+    )
+
+    is_available = models.BooleanField(default=True, verbose_name='Доступен для покупки')
 
     class Meta:
         verbose_name = 'Курс'
@@ -41,7 +49,8 @@ class Lesson(models.Model):
         verbose_name='Ссылка',
     )
 
-    # TODO
+    course = models.ForeignKey(Course, related_name='lessons', on_delete=models.CASCADE, verbose_name='Курс')
+
 
     class Meta:
         verbose_name = 'Урок'
@@ -55,7 +64,7 @@ class Lesson(models.Model):
 class Group(models.Model):
     """Модель группы."""
 
-    # TODO
+    name = models.CharField(max_length=50, unique=True, verbose_name='Название группы')
 
     class Meta:
         verbose_name = 'Группа'

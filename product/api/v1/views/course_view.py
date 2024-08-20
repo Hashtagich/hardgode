@@ -11,8 +11,11 @@ from api.v1.serializers.course_serializer import (CourseSerializer,
                                                   GroupSerializer,
                                                   LessonSerializer)
 from api.v1.serializers.user_serializer import SubscriptionSerializer
-from courses.models import Course
+from courses.models import Course, Group, Lesson
 from users.models import Subscription
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class LessonViewSet(viewsets.ModelViewSet):
@@ -54,7 +57,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    """Курсы """
+    """Курсы."""
 
     queryset = Course.objects.all()
     permission_classes = (ReadOnlyOrIsAdmin,)
@@ -72,9 +75,20 @@ class CourseViewSet(viewsets.ModelViewSet):
     def pay(self, request, pk):
         """Покупка доступа к курсу (подписка на курс)."""
 
-        # TODO
+        course = get_object_or_404(Course, id=pk)
+        user = request.user
+
+        # Проверка на существующую подписку
+        if Subscription.objects.filter(course=course, user=user).exists():
+            return Response(
+                {'detail': 'Вы уже подписаны на этот курс.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Создадим подписку
+        subscription = Subscription.objects.create(course=course, user=user)
 
         return Response(
-            data=data,
+            {'detail': 'Подписка успешно оформлена.', 'subscription_id': subscription.id},
             status=status.HTTP_201_CREATED
         )
